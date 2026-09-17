@@ -1,0 +1,55 @@
+backend:
+  name: git-gateway
+  branch: main
+
+locale: "ar"
+
+media_folder: "images"
+public_folder: "images"
+
+collections:
+  - name: "products"
+    label: "المنتجات"
+    files:
+      - file: "products.json"
+        label: "منتجات لاريا"
+        name: "products"
+        fields:
+          - label: "🪵 بخور فاخر"
+            name: "incense"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 450 ج.م / 350 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
+
+          - label: "✨ عطور شرقية"
+            name: "perfumes"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 750 ج.م / 550 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
+
+          - label: "💧 عناية بالبشرة"
+            name: "skincare"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 250 ج.م / 190 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }

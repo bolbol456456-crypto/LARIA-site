@@ -1,0 +1,53 @@
+{
+  "incense": [
+    {
+      "title_ar": "بخور لاريا الملكي",
+      "title_en": "Laria Royal Incense",
+      "desc_ar": "مبثوث ملكي مدمج بأجود أخشاب العود وزيوت العنبر المعتق لثبات يدوم طويلاً في المجالس.",
+      "desc_en": "Royal mabthouth infused with finest oud wood and aged amber oils for long-lasting aroma in gatherings.",
+      "price": "450 ج.م / 350 د.إ",
+      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=600&auto=format&fit=crop",
+      "whatsapp_text": "أريد طلب بخور لاريا الملكي"
+    },
+    {
+      "title_ar": "معمول العود الإماراتي",
+      "title_en": "Emirati Oud Maamoul",
+      "desc_ar": "خلطة إماراتية خاصة تجمع بين دهن العود ومسك الروز لتعطير البيت والملابس برائحة ساحرة.",
+      "desc_en": "Special Emirati blend combining oud oil and rose musk to scent home and clothes with a magical trail.",
+      "price": "380 ج.م / 290 د.إ",
+      "image": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=600&auto=format&fit=crop",
+      "whatsapp_text": "أريد طلب معمول العود الإماراتي"
+    }
+  ],
+  "perfumes": [
+    {
+      "title_ar": "عطر لاريا نايت (Night)",
+      "title_en": "Laria Night Perfume",
+      "desc_ar": "توليفة مركزة من العود والباتشولي والزهور النادرة لتمنحك حضوراً طاغياً في السهرات.",
+      "desc_en": "Concentrated blend of oud, patchouli, and rare florals to give you an overwhelming presence.",
+      "price": "750 ج.م / 550 د.إ",
+      "image": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?q=80&w=600&auto=format&fit=crop",
+      "whatsapp_text": "أريد طلب عطر لاريا نايت"
+    },
+    {
+      "title_ar": "عطر لاريا روز (Gold)",
+      "title_en": "Laria Gold Perfume",
+      "desc_ar": "عطر يجمع بين انتعاش الفواكه ودفء الأخشاب الشرقية، تصميم خاص للاستخدام اليومي الراقي.",
+      "desc_en": "A perfume blending fruity freshness with warm oriental woods, specially designed for daily luxury.",
+      "price": "650 ج.م / 480 د.إ",
+      "image": "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=600&auto=format&fit=crop",
+      "whatsapp_text": "أريد طلب عطر لاريا روز"
+    }
+  ],
+  "skincare": [
+    {
+      "title_ar": "مخمرية وعطر الجسم المرطب",
+      "title_en": "Body Butter & Moisturizer",
+      "desc_ar": "مرطب عميق للبشرة بخلاصة الزيوت العطرية النقية يمنح جسمك نعومة ورائحة عطرية فواحة تدوم ساعات.",
+      "desc_en": "Deep skin moisturizer infused with pure essential oils providing long-lasting softness and fragrance.",
+      "price": "250 ج.م / 190 د.إ",
+      "image": "https://images.unsplash.com/photo-1608248597359-97064d1f7055?q=80&w=600&auto=format&fit=crop",
+      "whatsapp_text": "أريد طلب مخمرية وعطر الجسم"
+    }
+  ]
+}
