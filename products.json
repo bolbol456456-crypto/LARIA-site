@@ -1,22 +1,11 @@
 {
   "incense": [
     {
-      "title_ar": "بخور لاريا الملكي",
-      "title_en": "Laria Royal Incense",
-      "desc_ar": "مبثوث ملكي مدمج بأجود أخشاب العود وزيوت العنبر المعتق لثبات يدوم طويلاً في المجالس.",
-      "desc_en": "Royal mabthouth infused with finest oud wood and aged amber oils for long-lasting aroma in gatherings.",
-      "price": "450 ج.م / 350 د.إ",
-      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=600&auto=format&fit=crop",
-      "whatsapp_text": "أريد طلب بخور لاريا الملكي"
-    },
-    {
-      "title_ar": "معمول العود الإماراتي",
-      "title_en": "Emirati Oud Maamoul",
-      "desc_ar": "خلطة إماراتية خاصة تجمع بين دهن العود ومسك الروز لتعطير البيت والملابس برائحة ساحرة.",
-      "desc_en": "Special Emirati blend combining oud oil and rose musk to scent home and clothes with a magical trail.",
-      "price": "380 ج.م / 290 د.إ",
-      "image": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=600&auto=format&fit=crop",
-      "whatsapp_text": "أريد طلب معمول العود الإماراتي"
+      "title_ar": " بخور لاريا الملكي  ",
+      "desc_ar": "بخور معمول اماراتي ",
+      "price": "730",
+      "image": "images/img_9559.png",
+      "whatsapp_text": "أريد طلب بخور لاريا الملكي "
     }
   ],
   "perfumes": [
