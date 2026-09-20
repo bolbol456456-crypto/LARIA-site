@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة تحكم LARIA</title>
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;font-family:-apple-system,"Segoe UI",Tahoma,sans-serif;background:#f5f5f7;color:#1d1d1f;font-size:16px}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #ddd;padding:10px 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select,input,textarea{font:inherit}
+button{border:0;border-radius:10px;padding:10px 14px;background:#e8e8ed;cursor:pointer}
+button.primary{background:#0a7d3b;color:#fff}
+button.danger{background:#fde8e8;color:#b00020}
+button:disabled{opacity:.6}
+select,input[type=text],input[type=password],input[type=number],input[type=search],textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;background:#fff}
+textarea{min-height:90px}
+textarea.json,#raw{direction:ltr;text-align:left;font-family:ui-monospace,Menlo,monospace;font-size:14px}
+main{padding:12px;max-width:800px;margin:auto}
+details{background:#fff;border-radius:12px;margin-bottom:8px;border:1px solid #e3e3e8}
+summary{display:flex;gap:10px;align-items:center;padding:10px;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary img{width:44px;height:44px;object-fit:cover;border-radius:8px;background:#eee}
+.form{padding:0 12px 12px}
+.field{display:block;margin-bottom:12px}
+.field>span{display:block;font-size:13px;color:#666;margin-bottom:4px;direction:ltr;text-align:right}
+.prev{max-width:120px;max-height:120px;border-radius:8px;display:block;margin:6px 0}
+.toast{position:fixed;bottom:16px;left:12px;right:12px;background:#222;color:#fff;padding:12px;border-radius:10px;text-align:center;display:none;z-index:10}
+.bad{border-color:#b00020!important}
+.hint{color:#666;font-size:14px;line-height:1.7}
+#login{max-width:480px;margin:40px auto;padding:16px}
+</style>
+</head>
+<body>
+
+<div id="login" hidden>
+  <h2>لوحة تحكم LARIA</h2>
+  <p class="hint">الصق GitHub Token (صلاحية Contents: Read and write على الـ repo ده بس). التوكن بيتحفظ على جهازك أنت بس.</p>
+  <input id="tok" type="password" placeholder="github_pat_..." autocomplete="off">
+  <p><button class="primary" id="btnLogin">دخول</button></p>
+  <p id="loginErr" class="hint" style="color:#b00020"></p>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="row">
+      <select id="fileSel" style="flex:1;min-width:140px"></select>
+      <select id="arrSel" style="flex:1;min-width:120px" hidden></select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="btnSave">💾 حفظ</button>
+      <button id="btnAdd">➕ إضافة</button>
+      <button id="btnRaw">{ } JSON</button>
+      <button id="btnOut">خروج</button>
+    </div>
+  </header>
+  <main>
+    <input type="search" id="q" placeholder="بحث..." style="margin-bottom:10px">
+    <div id="list"></div>
+    <div id="rawBox" hidden>
+      <p class="hint">تعديل الملف كـ JSON مباشرة. اتأكد إن الشكل سليم قبل الحفظ.</p>
+      <textarea id="raw" style="min-height:60vh"></textarea>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CFG = {
+  owner: 'bolbol456456-crypto',   // اسم حسابك على GitHub
+  repo: 'LARIA-site',             // اسم الـ repo
+  branch: 'main',
+  files: ['products.json'],
+  imagesDir: 'images/uploads/',
+  // أقسام الموقع (نفس المفاتيح اللي في products.json)
+  cats: {
+    incense: '🪵 بخور فاخر',
+    perfumes: '✨ عطور شرقية',
+    skincare: '💧 عناية بالبشرة',
+    room_fresheners: '🌬️ معطرات الجو',
+    linen_sprays: '🛏️ معطرات المفارش',
+    car_fresheners: '🚗 معطرات السيارات'
+  },
+  // أسماء الحقول بالعربي
+  names: {
+    title_ar: 'الاسم بالعربي', title_en: 'الاسم بالإنجليزي',
+    desc_ar: 'الوصف بالعربي', desc_en: 'الوصف بالإنجليزي',
+    price: 'السعر', image: 'صورة المنتج', whatsapp_text: 'رسالة الطلب على واتساب'
+  }
+};
+const API = 'https://api.github.com/repos/' + CFG.owner + '/' + CFG.repo;
+const $ = id => document.getElementById(id);
+let token = localStorage.getItem('laria_token') || '';
+const S = { file: CFG.files[0], sha: '', data: null, items: null, arrKey: null, arrKeys: [], rawMode: false, invalid: new Set(), dirty: false };
+
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+function toast(m, ms = 3500){ const t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', ms); }
+
+async function gh(path, opt = {}){
+  const r = await fetch(API + path, { ...opt, headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token, ...(opt.headers || {}) } });
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok){ const e = new Error(j.message || ('HTTP ' + r.status)); e.status = r.status; throw e; }
+  return j;
+}
+const put = (p, b) => gh(p, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+
+function b64enc(s){ const b = new TextEncoder().encode(s); let bin = ''; for(let i = 0; i < b.length; i += 0x8000) bin += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(bin); }
+function b64dec(s){ const bin = atob(s.replace(/\s/g, '')); return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))); }
+
+/* ---------- Login ---------- */
+function showLogin(msg){ $('app').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || ''; }
+$('btnLogin').onclick = async () => {
+  token = $('tok').value.trim(); $('loginErr').textContent = '';
+  try{
+    const r = await gh('');
+    if(r.permissions && !r.permissions.push) throw new Error('التوكن مالوش صلاحية كتابة على الـ repo');
+    localStorage.setItem('laria_token', token); start();
+  }catch(e){ token = ''; $('loginErr').textContent = 'فشل الدخول: ' + e.message; }
+};
+$('btnOut').onclick = () => { localStorage.removeItem('laria_token'); location.reload(); };
+
+function start(){
+  $('login').hidden = true; $('app').hidden = false;
+  const fs = $('fileSel'); fs.innerHTML = '';
+  CFG.files.forEach(f => { const o = document.createElement('option'); o.value = o.textContent = f; fs.appendChild(o); });
+  fs.hidden = CFG.files.length < 2;
+  loadFile();
+}
+$('fileSel').onchange = () => {
+  if(S.dirty && !confirm('في تعديلات مش محفوظة. تكمل؟')){ $('fileSel').value = S.file; return; }
+  S.file = $('fileSel').value; loadFile();
+};
+
+/* ---------- Load ---------- */
+async function loadFile(){
+  $('list').hidden = false; $('rawBox').hidden = true;
+  $('list').innerHTML = '<p class="hint">بحمّل...</p>';
+  try{
+    const f = await gh('/contents/' + S.file + '?ref=' + CFG.branch + '&t=' + Date.now());
+    let c = f.content;
+    if(!c) c = (await gh('/git/blobs/' + f.sha)).content;
+    S.sha = f.sha;
+    S.data = JSON.parse(b64dec(c).replace(/^\uFEFF/, ''));
+    S.dirty = false; S.rawMode = false;
+    resolve(); render();
+  }catch(e){
+    if(e.status === 401){ localStorage.removeItem('laria_token'); token = ''; return showLogin('التوكن مش شغال، الصق توكن جديد.'); }
+    $('list').innerHTML = '<p class="hint" style="color:#b00020">تعذر تحميل الملف: ' + esc(e.message) + '</p>';
+  }
+}
+
+function resolve(){
+  const d = S.data; S.arrKey = null; S.arrKeys = []; S.items = null;
+  if(Array.isArray(d)) S.items = d;
+  else if(d && typeof d === 'object'){
+    S.arrKeys = Object.keys(d).filter(k => Array.isArray(d[k]));
+    if(S.arrKeys.some(k => k in CFG.cats)){
+      Object.keys(CFG.cats).forEach(k => { if(!S.arrKeys.includes(k)) S.arrKeys.push(k); });
+    }
+    if(S.arrKeys.length){
+      S.arrKey = S.arrKeys.includes('products') ? 'products' : S.arrKeys[0];
+      if(!Array.isArray(d[S.arrKey])) d[S.arrKey] = [];
+      S.items = d[S.arrKey];
+    }
+  }
+  if(S.items && !S.items.every(x => x && typeof x === 'object' && !Array.isArray(x))) S.items = null;
+}
+$('arrSel').onchange = () => {
+  S.arrKey = $('arrSel').value;
+  if(!Array.isArray(S.data[S.arrKey])) S.data[S.arrKey] = [];
+  S.items = S.data[S.arrKey]; resolve2(); render();
+};
+function resolve2(){ if(S.items && !S.items.every(x => x && typeof x === 'object' && !Array.isArray(x))) S.items = null; }
+
+/* ---------- Helpers ---------- */
+const isImg = k => /image|img|photo|pic|thumb|صور/i.test(k);
+const imgSrc = v => /^(https?:|data:|blob:)/.test(v) ? v : v.replace(/^\.?\//, '');
+function pool(){
+  const out = S.items.slice();
+  if(S.arrKey) S.arrKeys.forEach(k => { const a = S.data[k]; if(k !== S.arrKey && Array.isArray(a)) a.forEach(o => { if(o && typeof o === 'object') out.push(o); }); });
+  return out;
+}
+function fields(){ const ks = []; pool().forEach(o => Object.keys(o).forEach(k => { if(!ks.includes(k)) ks.push(k); })); return ks; }
+function firstVal(k){ for(const o of pool()) if(o[k] != null) return o[k]; return undefined; }
+function label(o){
+  for(const k of ['title_ar','name','title','name_ar','nameAr','label','اسم']) if(typeof o[k] === 'string' && o[k]) return o[k];
+  for(const k in o) if(typeof o[k] === 'string' && o[k] && !isImg(k) && k !== 'id') return o[k];
+  return 'عنصر';
+}
+function thumb(o){
+  for(const k in o) if(isImg(k)){ const v = Array.isArray(o[k]) ? o[k][0] : o[k]; if(typeof v === 'string' && v) return imgSrc(v); }
+  return '';
+}
+const imgPrefix = () => CFG.imagesDir;
+
+/* ---------- Render ---------- */
+function render(){
+  const raw = S.rawMode || !S.items;
+  S.invalid.clear();
+  $('rawBox').hidden = !raw; $('list').hidden = raw; $('q').hidden = raw; $('btnAdd').hidden = raw;
+  const as = $('arrSel'); as.hidden = raw || S.arrKeys.length < 2; as.innerHTML = '';
+  S.arrKeys.forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = CFG.cats[k] || k; o.selected = k === S.arrKey; as.appendChild(o); });
+  if(raw){ $('raw').value = JSON.stringify(S.data, null, 2); return; }
+  const L = $('list'); L.innerHTML = '';
+  if(!S.items.length){ L.innerHTML = '<p class="hint">مفيش عناصر. اضغط إضافة.</p>'; return; }
+  S.items.forEach((o, i) => L.appendChild(card(o, i)));
+}
+$('raw').oninput = () => { S.dirty = true; };
+
+function card(o, i){
+  const d = document.createElement('details'); d.dataset.i = i;
+  const s = document.createElement('summary'); const t = thumb(o);
+  s.innerHTML = (t ? '<img loading="lazy" src="' + esc(t) + '">' : '') + '<div><b></b><div class="hint" data-p></div></div>';
+  s.querySelector('b').textContent = label(o);
+  s.querySelector('[data-p]').textContent = o.price != null ? String(o.price) : '';
+  d.appendChild(s);
+  d.addEventListener('toggle', () => { if(d.open && !d.querySelector('.form')) d.appendChild(buildForm(i)); });
+  return d;
+}
+
+function buildForm(i){
+  const o = S.items[i]; const f = document.createElement('div'); f.className = 'form';
+  fields().forEach(k => f.appendChild(fieldRow(o, k)));
+  const del = document.createElement('button'); del.className = 'danger'; del.textContent = '🗑 حذف العنصر';
+  del.onclick = () => { if(confirm('تحذف العنصر ده؟')){ S.items.splice(i, 1); S.dirty = true; render(); } };
+  f.appendChild(del); return f;
+}
+
+function fieldRow(o, k){
+  const w = document.createElement('div'); w.className = 'field';
+  const sp = document.createElement('span'); sp.textContent = (CFG.names[k] ? CFG.names[k] + '  (' + k + ')' : k); w.appendChild(sp);
+  const base = o[k] != null ? o[k] : firstVal(k);
+  const set = v => { o[k] = v; S.dirty = true; };
+  let inp;
+  if(typeof base === 'boolean'){
+    inp = document.createElement('input'); inp.type = 'checkbox'; inp.checked = !!o[k];
+    inp.style.width = inp.style.height = '26px'; inp.onchange = () => set(inp.checked);
+  }else if(typeof base === 'number'){
+    inp = document.createElement('input'); inp.type = 'number'; inp.step = 'any';
+    inp.value = o[k] == null ? '' : o[k];
+    inp.oninput = () => set(inp.value === '' ? null : Number(inp.value));
+  }else if(base !== null && typeof base === 'object'){
+    inp = document.createElement('textarea'); inp.className = 'json';
+    inp.value = JSON.stringify(o[k] != null ? o[k] : (Array.isArray(base) ? [] : {}), null, 2);
+    inp.oninput = () => { try{ set(JSON.parse(inp.value)); inp.classList.remove('bad'); S.invalid.delete(inp); }catch(e){ inp.classList.add('bad'); S.invalid.add(inp); } };
+  }else{
+    const v = o[k] == null ? '' : String(o[k]);
+    const long = v.length > 60 || v.includes('\n') || /desc|detail|text|وصف/i.test(k);
+    inp = document.createElement(long ? 'textarea' : 'input'); if(!long) inp.type = 'text';
+    inp.dir = 'auto'; inp.value = v; inp.oninput = () => set(inp.value);
+  }
+  w.appendChild(inp);
+
+  if(isImg(k) && (typeof base === 'string' || Array.isArray(base) || base == null)){
+    const prev = document.createElement('img'); prev.className = 'prev';
+    const cur = () => { const v = o[k]; return Array.isArray(v) ? v[0] : v; };
+    const upd = () => { const v = cur(); if(typeof v === 'string' && v){ prev.src = imgSrc(v); prev.style.display = 'block'; } else prev.style.display = 'none'; };
+    upd(); w.appendChild(prev);
+    const btn = document.createElement('button'); btn.textContent = '📷 رفع صورة';
+    const file = document.createElement('input'); file.type = 'file'; file.accept = 'image/*'; file.hidden = true;
+    btn.onclick = () => file.click();
+    file.onchange = async () => {
+      if(!file.files[0]) return; btn.disabled = true; btn.textContent = 'بيرفع...';
+      try{
+        const p = await uploadImage(file.files[0]); const v = o[k];
+        if(Array.isArray(v)){ v.push(p.path); inp.value = JSON.stringify(v, null, 2); }
+        else if(Array.isArray(base)){ o[k] = [p.path]; inp.value = JSON.stringify(o[k], null, 2); }
+        else{ o[k] = p.path; inp.value = p.path; }
+        prev.src = p.preview; prev.style.display = 'block'; S.dirty = true;
+        toast('اترفعت الصورة ✅ لسه لازم تدوس حفظ');
+      }catch(e){ toast('فشل رفع الصورة: ' + e.message, 6000); }
+      btn.disabled = false; btn.textContent = '📷 رفع صورة'; file.value = '';
+    };
+    w.appendChild(btn); w.appendChild(file);
+  }
+  return w;
+}
+
+/* ---------- Image upload (بيصغّر الصورة تلقائي) ---------- */
+async function uploadImage(file){
+  const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('الصورة مش مقروءة')); im.src = URL.createObjectURL(file); });
+  const max = 1400, sc = Math.min(1, max / Math.max(img.width, img.height));
+  const w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const ctx = c.getContext('2d');
+  const png = file.type === 'image/png';
+  if(!png){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+  ctx.drawImage(img, 0, 0, w, h);
+  const preview = c.toDataURL(png ? 'image/png' : 'image/jpeg', .85);
+  const b64 = preview.split(',')[1];
+  const name = Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + (png ? '.png' : '.jpg');
+  await put('/contents/' + CFG.imagesDir + name, { message: 'Upload image ' + name, content: b64, branch: CFG.branch });
+  return { path: imgPrefix() + name, preview };
+}
+
+/* ---------- Actions ---------- */
+$('btnAdd').onclick = () => {
+  const o = {};
+  fields().forEach(k => { const v = firstVal(k); o[k] = Array.isArray(v) ? [] : typeof v === 'number' ? 0 : typeof v === 'boolean' ? false : (v && typeof v === 'object') ? {} : ''; });
+  if('id' in o){
+    const ids = S.items.map(x => x.id).filter(x => x != null);
+    o.id = ids.length && ids.every(x => typeof x === 'number') ? Math.max(...ids) + 1 : Date.now().toString(36);
+  }
+  S.items.push(o); S.dirty = true; render();
+  const last = $('list').lastElementChild; last.open = true; last.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+$('btnRaw').onclick = () => {
+  if(S.rawMode || !S.items){
+    try{ S.data = JSON.parse($('raw').value); }catch(e){ return toast('JSON فيه خطأ: ' + e.message, 6000); }
+    resolve(); S.rawMode = false;
+  }else S.rawMode = true;
+  render();
+};
+
+$('q').oninput = () => {
+  const q = $('q').value.trim().toLowerCase();
+  [...$('list').children].forEach(d => { if(d.dataset && d.dataset.i !== undefined) d.hidden = !!q && !JSON.stringify(S.items[+d.dataset.i]).toLowerCase().includes(q); });
+};
+
+$('btnSave').onclick = async () => {
+  const b = $('btnSave');
+  if(S.rawMode || !S.items){ try{ S.data = JSON.parse($('raw').value); }catch(e){ return toast('JSON فيه خطأ: ' + e.message, 6000); } }
+  if(S.invalid.size) return toast('في حقل JSON فيه خطأ (الحقل الأحمر)', 5000);
+  b.disabled = true; b.textContent = 'بيحفظ...';
+  try{
+    const text = JSON.stringify(S.data, null, 2) + '\n';
+    const r = await put('/contents/' + S.file, { message: 'Update ' + S.file + ' from admin panel', content: b64enc(text), sha: S.sha, branch: CFG.branch });
+    S.sha = r.content.sha; S.dirty = false;
+    toast('تم الحفظ ✅ الموقع هيتحدث خلال دقيقة تقريبًا', 6000);
+  }catch(e){
+    toast((e.status === 409 || e.status === 422) ? 'حصل تعارض في النسخة، اعمل ريفرش للصفحة وجرب تاني' : 'فشل الحفظ: ' + e.message, 7000);
+  }
+  b.disabled = false; b.textContent = '💾 حفظ';
+};
+
+window.onbeforeunload = e => { if(S.dirty){ e.preventDefault(); e.returnValue = ''; } };
+
+if(token) start(); else showLogin();
+</script>
+</body>
+</html>
