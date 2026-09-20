@@ -1,0 +1,35 @@
+{
+  "room_fresheners": [
+    {
+      "title_ar": "معطر جو لاريا عود",
+      "title_en": "Laria Oud Room Spray",
+      "desc_ar": "معطر جو برائحة العود والعنبر يملأ المكان بعبق دافئ يدوم لساعات.",
+      "desc_en": "Oud and amber room spray that fills the space with a warm scent lasting for hours.",
+      "price": "150 ج.م",
+      "image": "images/uploads/room-oud.jpg",
+      "whatsapp_text": "أرغب في طلب معطر جو لاريا عود"
+    }
+  ],
+  "linen_sprays": [
+    {
+      "title_ar": "معطر مفارش لاريا مسك",
+      "title_en": "Laria Musk Linen Spray",
+      "desc_ar": "رذاذ خفيف للمفارش والمخدات برائحة المسك النقي، ينعش السرير ويمنحك نوماً هادئاً.",
+      "desc_en": "A light mist for bed linen and pillows with pure musk, freshening your bed for restful sleep.",
+      "price": "120 ج.م",
+      "image": "images/uploads/linen-musk.jpg",
+      "whatsapp_text": "أرغب في طلب معطر مفارش لاريا مسك"
+    }
+  ],
+  "car_fresheners": [
+    {
+      "title_ar": "معطر سيارة لاريا عنبر",
+      "title_en": "Laria Amber Car Freshener",
+      "desc_ar": "معطر سيارة بثبات عالٍ برائحة العنبر والأخشاب الشرقية، يناسب الرحلات اليومية.",
+      "desc_en": "Long-lasting car freshener with amber and oriental woods, made for daily drives.",
+      "price": "90 ج.م",
+      "image": "images/uploads/car-amber.jpg",
+      "whatsapp_text": "أرغب في طلب معطر سيارة لاريا عنبر"
+    }
+  ]
+}

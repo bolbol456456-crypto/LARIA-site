@@ -401,6 +401,13 @@
             font-weight: 300;
         }
 
+        .empty-note {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 0;
+        }
+
         .whatsapp-float {
             position: fixed;
             bottom: 20px;
@@ -469,6 +476,9 @@
                 <button class="tab-btn active" onclick="switchTab('incense', event)" data-translate="tabIncense">🪵 بخور فاخر</button>
                 <button class="tab-btn" onclick="switchTab('perfumes', event)" data-translate="tabPerfumes">✨ عطور شرقية</button>
                 <button class="tab-btn" onclick="switchTab('skincare', event)" data-translate="tabSkin">💧 عناية بالبشرة (Skin Care)</button>
+                <button class="tab-btn" onclick="switchTab('room_fresheners', event)" data-translate="tabRoom">🌬️ معطرات الجو</button>
+                <button class="tab-btn" onclick="switchTab('linen_sprays', event)" data-translate="tabLinen">🛏️ معطرات المفارش</button>
+                <button class="tab-btn" onclick="switchTab('car_fresheners', event)" data-translate="tabCar">🚗 معطرات السيارات</button>
             </div>
 
             <!-- تبويب البخور -->
@@ -484,6 +494,21 @@
             <!-- تبويب العناية بالبشرة -->
             <div id="skincare" class="product-tab-content">
                 <div class="card-grid"><!-- تتم تعبئته تلقائياً من products.json --></div>
+            </div>
+
+            <!-- تبويب معطرات الجو -->
+            <div id="room_fresheners" class="product-tab-content">
+                <div class="card-grid"><!-- تتم تعبئته تلقائياً من products.json (room_fresheners) --></div>
+            </div>
+
+            <!-- تبويب معطرات المفارش -->
+            <div id="linen_sprays" class="product-tab-content">
+                <div class="card-grid"><!-- تتم تعبئته تلقائياً من products.json (linen_sprays) --></div>
+            </div>
+
+            <!-- تبويب معطرات السيارات -->
+            <div id="car_fresheners" class="product-tab-content">
+                <div class="card-grid"><!-- تتم تعبئته تلقائياً من products.json (car_fresheners) --></div>
             </div>
         </section>
 
@@ -536,7 +561,7 @@
         <section id="contact" style="text-align: center; margin-top: 60px;">
             <h2 class="section-title" data-translate="contactTitle">دعنا نخدمك</h2>
             <p style="margin-bottom: 25px; font-size: 1.1rem;" data-translate="contactSub">احصل على بخور وعطور لاريا الآن واملأ منزلك بأرقى النفحات الشرقية.</p>
-            <a href="https://wa.me/20YOURNUMBER" class="btn" target="_blank" data-translate="contactBtn">تواصل عبر واتساب للطلب</a>
+            <a href="https://wa.me/201260075393" class="btn" target="_blank" data-translate="contactBtn">تواصل عبر واتساب للطلب</a>
         </section>
 
     </div>
@@ -549,7 +574,7 @@
     </footer>
 
     <!-- زر واتساب عائم -->
-    <a href="https://wa.me/20YOURNUMBER" class="whatsapp-float" target="_blank">
+    <a href="https://wa.me/201260075393" class="whatsapp-float" target="_blank">
         💬 <span data-translate="floatBtn">اطلب الآن</span>
     </a>
 
@@ -590,6 +615,10 @@
                 tabIncense: "🪵 بخور فاخر",
                 tabPerfumes: "✨ عطور شرقية",
                 tabSkin: "💧 عناية بالبشرة (Skin Care)",
+                tabRoom: "🌬️ معطرات الجو",
+                tabLinen: "🛏️ معطرات المفارش",
+                tabCar: "🚗 معطرات السيارات",
+                emptyCategory: "منتجات هذا القسم قادمة قريباً.",
                 inc1Title: "بخور لاريا الملكي",
                 inc1Desc: "مبثوث ملكي مدمج بأجود أخشاب العود وزيوت العنبر المعتق لثبات يدوم طويلاً في المجالس.",
                 inc2Title: "معمول العود الإماراتي",
@@ -644,6 +673,10 @@
                 tabIncense: "🪵 Luxury Incense",
                 tabPerfumes: "✨ Oriental Perfumes",
                 tabSkin: "💧 Skin Care",
+                tabRoom: "🌬️ Room Fresheners",
+                tabLinen: "🛏️ Linen Sprays",
+                tabCar: "🚗 Car Fresheners",
+                emptyCategory: "Products for this category are coming soon.",
                 inc1Title: "Laria Royal Incense",
                 inc1Desc: "Royal mabthouth infused with finest oud wood and aged amber oils for long-lasting aroma in gatherings.",
                 inc2Title: "Emirati Oud Maamoul",
@@ -721,13 +754,17 @@
 
         function renderProducts() {
             if (!productsData) return;
-            const categories = ['incense', 'perfumes', 'skincare'];
+            const categories = ['incense', 'perfumes', 'skincare', 'room_fresheners', 'linen_sprays', 'car_fresheners'];
             const orderLabel = translations[currentLang].orderBtn;
 
             categories.forEach(cat => {
                 const wrapper = document.querySelector('#' + cat + ' .card-grid');
                 if (!wrapper) return;
                 const items = productsData[cat] || [];
+                if (items.length === 0) {
+                    wrapper.innerHTML = '<p class="empty-note">' + escapeHtml(translations[currentLang].emptyCategory) + '</p>';
+                    return;
+                }
                 wrapper.innerHTML = items.map(p => {
                     const title = (currentLang === 'ar' ? p.title_ar : (p.title_en || p.title_ar)) || '';
                     const desc = (currentLang === 'ar' ? p.desc_ar : (p.desc_en || p.desc_ar)) || '';
@@ -740,7 +777,7 @@
                                 <p>${escapeHtml(desc)}</p>
                                 <div class="price">${escapeHtml(p.price)}</div>
                             </div>
-                            <a href="https://wa.me/20YOURNUMBER?text=${waMessage}" class="order-card-btn" target="_blank">${escapeHtml(orderLabel)}</a>
+                            <a href="https://wa.me/201260075393?text=${waMessage}" class="order-card-btn" target="_blank">${escapeHtml(orderLabel)}</a>
                         </div>
                     `;
                 }).join('');
