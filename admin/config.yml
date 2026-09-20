@@ -53,3 +53,42 @@ collections:
               - { label: "السعر", name: "price", widget: "string", hint: "مثال: 250 ج.م / 190 د.إ" }
               - { label: "صورة المنتج", name: "image", widget: "image" }
               - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
+
+          - label: "🌬️ معطرات الجو"
+            name: "room_fresheners"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 150 ج.م / 110 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
+
+          - label: "🛏️ معطرات المفارش"
+            name: "linen_sprays"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 120 ج.م / 90 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
+
+          - label: "🚗 معطرات السيارات"
+            name: "car_fresheners"
+            widget: "list"
+            summary: "{{title_ar}} — {{price}}"
+            fields:
+              - { label: "الاسم بالعربي", name: "title_ar", widget: "string" }
+              - { label: "الاسم بالإنجليزي", name: "title_en", widget: "string", required: false }
+              - { label: "الوصف بالعربي", name: "desc_ar", widget: "text" }
+              - { label: "الوصف بالإنجليزي", name: "desc_en", widget: "text", required: false }
+              - { label: "السعر", name: "price", widget: "string", hint: "مثال: 90 ج.م / 70 د.إ" }
+              - { label: "صورة المنتج", name: "image", widget: "image" }
+              - { label: "رسالة الطلب على واتساب", name: "whatsapp_text", widget: "string" }
